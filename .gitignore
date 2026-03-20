@@ -1,0 +1,54 @@
+# Data
+data/
+*.csv
+*.tsv
+*.parquet
+
+# Models
+models/
+*.bin
+*.pt
+*.pth
+*.safetensors
+*.joblib
+
+# Results (keep directory)
+results/*.png
+results/*.json
+
+# Hugging Face cache
+.cache/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Environment
+.env
+.venv/
+env/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+wandb/
+mlruns/
