@@ -40,12 +40,14 @@ NUM_LABELS = len(LABEL_NAMES)
 
 def load_ag_news(
     cache_dir: str = "data",
+    allow_synthetic: bool = False,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Load the AG News dataset via Hugging Face ``datasets``.
 
-    Falls back to synthetic data if the library is unavailable or download
-    fails (e.g. offline environment).
+    When ``allow_synthetic`` is true, uses synthetic text if the library is
+    unavailable or download fails. This option is for offline code development
+    only and must not be used as an AG News benchmark.
 
     Returns:
         (train_df, test_df) each with columns ``text`` and ``label``.
@@ -58,7 +60,12 @@ def load_ag_news(
         test_df = ds["test"].to_pandas()  # type: ignore[union-attr]
         logger.info("AG News loaded: %d train, %d test", len(train_df), len(test_df))
     except Exception as exc:
-        logger.warning("Could not load AG News (%s). Generating synthetic data.", exc)
+        if not allow_synthetic:
+            raise RuntimeError(
+                "Could not load AG News. Check network access and dataset availability, "
+                "or pass --synthetic for offline development only."
+            ) from exc
+        logger.warning("Could not load AG News (%s). Generating synthetic development data.", exc)
         train_df, test_df = _generate_synthetic_ag_news()
 
     return train_df, test_df

@@ -257,11 +257,16 @@ def main() -> None:
     parser.add_argument(
         "--model_type", choices=["baseline", "transformer"], default="transformer"
     )
+    parser.add_argument(
+        "--synthetic",
+        action="store_true",
+        help="Use synthetic development data if AG News cannot be loaded; not a benchmark.",
+    )
     args = parser.parse_args()
 
     from src.data_loader import create_tfidf_features, load_ag_news
 
-    train_df, test_df = load_ag_news()
+    train_df, test_df = load_ag_news(allow_synthetic=args.synthetic)
     evaluator = TextClassificationEvaluator()
 
     if args.model_type == "baseline":

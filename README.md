@@ -1,112 +1,60 @@
 # NLP Text Classification with Transformers
 
-Fine-tuning DistilBERT for multi-class news article classification on the AG News dataset, with a TF-IDF + Logistic Regression baseline comparison. Demonstrates transfer learning, the Hugging Face Transformers ecosystem, and modern NLP engineering practices.
+An experimental comparison of TF-IDF classifiers and a DistilBERT sequence classifier for four-class AG News categorization. It is a learning and research project, not a deployed content-moderation, routing, or editorial decision system.
 
-## Project Overview
+## Evidence and limitations
 
-Text classification is a fundamental NLP task with applications in content moderation, news categorization, sentiment analysis, and document routing. This project compares traditional ML approaches with pre-trained transformer models:
+This repository versions source code and notebooks, but not downloaded AG News data, trained models, checkpoints, metrics, plots, or run metadata. It therefore makes no verified accuracy, F1, latency, parameter, or model-comparison claim.
 
-- **Baseline**: TF-IDF vectorization + Logistic Regression / SVM
-- **Transformer**: DistilBERT fine-tuned for sequence classification
-- **Evaluation**: Per-class precision/recall, confusion matrix, inference speed comparison
-- **Inference Pipeline**: Production-ready prediction on new text inputs
+By default, the pipeline requires the public [AG News dataset](https://huggingface.co/datasets/ag_news) through Hugging Face Datasets. If access fails, it stops rather than silently evaluating template-generated text. A deterministic synthetic fixture is available only through `--synthetic` for offline development; its results are not comparable to AG News or to real-world news classification.
 
-## Dataset
+## Included methods
 
-**AG News** — [Hugging Face Datasets](https://huggingface.co/datasets/ag_news) / [Kaggle](https://www.kaggle.com/datasets/amananandrai/ag-news-classification-dataset)
-- **120,000** training samples, **7,600** test samples
-- **4 classes**: World, Sports, Business, Science/Technology
-- Balanced class distribution
+- TF-IDF with logistic regression, linear SVM, or random forest baselines.
+- DistilBERT fine-tuning through Hugging Face `Trainer`.
+- A stratified validation split for transformer tuning and the published test split for final evaluation.
+- Classification metrics, confusion matrices, and optional latency measurement.
+- Baseline and transformer inference helpers for locally saved artifacts.
 
-## Project Structure
-
-```
-NLP-Text-Classification-Transformers/
-├── README.md
-├── requirements.txt
-├── .gitignore
-├── src/
-│   ├── __init__.py
-│   ├── data_loader.py      # Dataset loading, tokenization, DataLoader creation
-│   ├── model.py            # DistilBERT fine-tuning + TF-IDF baseline models
-│   ├── train.py            # Training with Hugging Face Trainer API
-│   ├── evaluate.py         # Metrics, confusion matrix, per-class report
-│   ├── inference.py        # Single/batch text prediction pipeline
-│   └── utils.py            # Config, reproducibility, logging helpers
-├── notebooks/
-│   ├── 01_EDA_and_Preprocessing.ipynb
-│   └── 02_Training_and_Evaluation.ipynb
-├── data/                   # Dataset directory
-├── models/                 # Saved model checkpoints
-└── results/                # Evaluation plots and metrics
-```
-
-## Quick Start
+## Install
 
 ```bash
-# Clone the repository
 git clone https://github.com/mzquadri/NLP-Text-Classification-Transformers.git
 cd NLP-Text-Classification-Transformers
-
-# Install dependencies
+python -m venv .venv
+.venv\Scripts\activate  # Windows PowerShell
 pip install -r requirements.txt
-
-# Train baseline model
-python src/train.py --model baseline --epochs 1
-
-# Fine-tune DistilBERT
-python src/train.py --model distilbert --epochs 3 --batch_size 32
-
-# Evaluate
-python src/evaluate.py --model_path models/distilbert-ag-news
-
-# Run inference on new text
-python src/inference.py --text "Apple unveils new MacBook with M4 chip"
 ```
 
-## Results
+## Run an experiment
 
-| Model | Accuracy | F1 (macro) | Inference (ms/sample) | Parameters |
-|-------|----------|------------|----------------------|------------|
-| TF-IDF + Logistic Regression | 91.2% | 0.912 | 0.3 | ~400K |
-| TF-IDF + SVM | 91.8% | 0.918 | 0.5 | ~400K |
-| DistilBERT (fine-tuned, 3 epochs) | 94.6% | 0.946 | 8.2 | 66M |
+```bash
+# Downloads AG News and writes untracked artifacts under models/ and results/.
+python src/train.py --model baseline --baseline_type logistic_regression
 
-### Key Findings
+# Fine-tunes DistilBERT. This downloads the base model and can require substantial RAM/VRAM.
+python src/train.py --model distilbert --epochs 3 --batch_size 32
 
-- DistilBERT achieves **+3.4%** accuracy over the best baseline with only 3 epochs of fine-tuning
-- TF-IDF + LR remains competitive and is **27x faster** at inference
-- Sports and Science/Technology are easiest to classify; World and Business have more overlap
-- Fine-tuning the full model outperforms feature extraction (frozen backbone) by ~2%
+# Evaluate a locally saved model.
+python src/evaluate.py --model_type baseline --model_path models/baseline
+python src/inference.py --model_type baseline --text "Apple unveils a new laptop"
+```
 
-## Key Features
+For offline code development only, add `--synthetic` to `train.py` or `evaluate.py`. Synthetic examples have class-specific templates, so they should not be used to report model capability.
 
-- **Hugging Face Ecosystem**: AutoTokenizer, AutoModelForSequenceClassification, Trainer API
-- **Transfer Learning**: Pre-trained DistilBERT adapted for domain-specific classification
-- **Fair Comparison**: Same train/test splits, same evaluation metrics for baseline and transformer
-- **Reproducibility**: Seed management, config-driven experiments, deterministic training
-- **Inference Pipeline**: Ready-to-deploy prediction function with confidence scores
+## Reproducibility notes
 
-## Technical Stack
+Record the dataset revision, package versions, hardware, random seed, training arguments, split policy, and generated metrics before comparing runs. The repository sets common random seeds, but GPU and library-level operations can still be nondeterministic. Do not tune model choices or thresholds against the held-out test split.
 
-- **Transformers**: Hugging Face Transformers, Tokenizers
-- **Deep Learning**: PyTorch
-- **Traditional ML**: scikit-learn (TF-IDF, Logistic Regression, SVM)
-- **Data**: Hugging Face Datasets, Pandas, NumPy
-- **Visualization**: Matplotlib, Seaborn
-- **Evaluation**: scikit-learn metrics
+## Verify the checkout
 
-## Alignment with Experience
+```bash
+python scripts/check_repository.py
+python scripts/smoke_test.py
+```
 
-This project reflects NLP and deep learning engineering skills from **BP-ITCS** AI engineering work, including:
-- Fine-tuning pre-trained models for domain-specific tasks
-- Building production-grade inference pipelines
-- Systematic model comparison and evaluation
-- Modern ML tooling (Hugging Face, PyTorch)
+The smoke test generates a small synthetic fixture and trains a TF-IDF baseline. It does not download AG News, download a transformer, or establish benchmark performance.
 
-## Author
+## License
 
-**Mohd Zamin Quadri** - M.Sc. Mathematics in Science and Engineering, Technical University of Munich
-
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-mohd--zamin-blue)](https://www.linkedin.com/in/mohd-zamin/)
-[![GitHub](https://img.shields.io/badge/GitHub-mzquadri-black)](https://github.com/mzquadri)
+MIT. See [LICENSE](LICENSE).

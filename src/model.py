@@ -47,7 +47,6 @@ def build_baseline_model(
             "C": 1.0,
             "max_iter": 1000,
             "solver": "lbfgs",
-            "multi_class": "multinomial",
         },
         "svm": {"C": 1.0, "max_iter": 2000},
         "random_forest": {"n_estimators": 200, "max_depth": 30, "n_jobs": -1},

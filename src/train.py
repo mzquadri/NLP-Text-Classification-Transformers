@@ -230,6 +230,11 @@ def main() -> None:
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--learning_rate", type=float, default=2e-5)
     parser.add_argument("--max_features", type=int, default=50000)
+    parser.add_argument(
+        "--synthetic",
+        action="store_true",
+        help="Use synthetic development data if AG News cannot be loaded; not a benchmark.",
+    )
     args = parser.parse_args()
 
     from src.data_loader import (
@@ -238,7 +243,7 @@ def main() -> None:
         load_ag_news,
     )
 
-    train_df, test_df = load_ag_news()
+    train_df, test_df = load_ag_news(allow_synthetic=args.synthetic)
 
     if args.model == "baseline":
         from src.model import build_baseline_model
