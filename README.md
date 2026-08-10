@@ -1,6 +1,10 @@
 # NLP Text Classification with Transformers
 
-An experimental comparison of TF-IDF classifiers and a DistilBERT sequence classifier for four-class AG News categorization. It is a learning and research project, not a deployed content-moderation, routing, or editorial decision system.
+Classical machine learning against a fine-tuned transformer, on the same task: sorting AG News headlines into World, Sports, Business and Sci/Tech. TF-IDF with logistic regression, linear SVM or random forest on one side, DistilBERT fine-tuned with the Hugging Face Trainer on the other, both evaluated the same way. It is a learning and research project, not a deployed content-moderation, routing, or editorial decision system.
+
+<p align="center">
+  <img src="docs/diagrams/approach.svg" alt="Two-track approach: TF-IDF baselines vs DistilBERT on AG News" width="940">
+</p>
 
 ## Evidence and limitations
 
@@ -54,6 +58,16 @@ python scripts/smoke_test.py
 ```
 
 The smoke test generates a small synthetic fixture and trains a TF-IDF baseline. It does not download AG News, download a transformer, or establish benchmark performance.
+
+## Repository structure
+
+```
+notebooks/            EDA/preprocessing and training/evaluation walkthroughs
+src/                  data_loader, model builders, train, evaluate, inference, utils
+scripts/              checkout verification and smoke test
+results/              run outputs land here (gitignored, see .gitkeep)
+docs/diagrams/        SVG overview of the two-track approach
+```
 
 ## License
 
