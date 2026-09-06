@@ -1,58 +1,60 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="940" height="380" viewBox="0 0 940 380" font-family="Segoe UI, Arial, sans-serif">
-  <defs>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L0,6 L9,3 z" fill="#64748b"/>
-    </marker>
-  </defs>
-  <rect width="940" height="380" fill="#ffffff"/>
-  <text x="470" y="30" text-anchor="middle" font-size="19" font-weight="600" fill="#0f172a">AG News classification: classical baselines vs a fine-tuned transformer</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="960" height="560"
+     font-family="Segoe UI, DejaVu Sans, Helvetica, Arial, sans-serif">
+  <rect width="960" height="560" fill="#FFFFFF"/>
 
-  <!-- Data -->
-  <rect x="30" y="70" width="200" height="86" rx="10" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
-  <text x="130" y="95" text-anchor="middle" font-size="14" font-weight="600" fill="#9a3412">AG News dataset</text>
-  <text x="130" y="114" text-anchor="middle" font-size="12" fill="#9a3412">via Hugging Face Datasets</text>
-  <text x="130" y="132" text-anchor="middle" font-size="12" fill="#9a3412">4 classes: World, Sports,</text>
-  <text x="130" y="147" text-anchor="middle" font-size="12" fill="#9a3412">Business, Sci/Tech</text>
+  <!-- Source -->
+  <rect x="330" y="24" width="300" height="60" rx="8" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.6"/>
+  <text x="480" y="48" text-anchor="middle" font-size="15" font-weight="600" fill="#111827">AG News</text>
+  <text x="480" y="68" text-anchor="middle" font-size="12" fill="#4B5563">120,000 train and 7,600 published test, four classes</text>
 
   <!-- Split -->
-  <rect x="30" y="196" width="200" height="66" rx="10" fill="#f8fafc" stroke="#64748b" stroke-width="1.5"/>
-  <text x="130" y="221" text-anchor="middle" font-size="13" font-weight="600" fill="#334155">Split policy</text>
-  <text x="130" y="239" text-anchor="middle" font-size="11.5" fill="#475569">stratified validation for tuning</text>
-  <text x="130" y="254" text-anchor="middle" font-size="11.5" fill="#475569">published test split held out</text>
+  <path d="M480 84 L480 108" stroke="#9CA3AF" stroke-width="1.6" fill="none"/>
+  <rect x="270" y="108" width="420" height="52" rx="8" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1.4"/>
+  <text x="480" y="128" text-anchor="middle" font-size="12.5" fill="#111827">stratified split, seed 42</text>
+  <text x="480" y="147" text-anchor="middle" font-size="11.5" fill="#4B5563">108,000 train &#183; 12,000 validation &#183; 7,600 test, untouched until scoring</text>
 
-  <!-- Track A -->
-  <rect x="310" y="60" width="290" height="110" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
-  <text x="455" y="84" text-anchor="middle" font-size="14" font-weight="600" fill="#1d4ed8">Track A — TF-IDF + scikit-learn</text>
-  <text x="455" y="104" text-anchor="middle" font-size="12" fill="#1e40af">Logistic Regression · Linear SVM · Random Forest</text>
-  <text x="455" y="122" text-anchor="middle" font-size="12" fill="#1e40af">5-fold cross-validation on the training set</text>
-  <text x="455" y="140" text-anchor="middle" font-size="12" fill="#1e40af">fast to train, strong bag-of-words reference</text>
-  <text x="455" y="158" text-anchor="middle" font-size="11.5" fill="#64748b">src/train.py --model baseline</text>
+  <path d="M480 160 L480 182" stroke="#9CA3AF" stroke-width="1.6" fill="none"/>
+  <path d="M480 182 L250 182 L250 206" stroke="#9CA3AF" stroke-width="1.6" fill="none"/>
+  <path d="M480 182 L710 182 L710 206" stroke="#9CA3AF" stroke-width="1.6" fill="none"/>
 
-  <!-- Track B -->
-  <rect x="310" y="190" width="290" height="110" rx="10" fill="#f5f3ff" stroke="#7c3aed" stroke-width="1.5"/>
-  <text x="455" y="214" text-anchor="middle" font-size="14" font-weight="600" fill="#6d28d9">Track B — DistilBERT fine-tuning</text>
-  <text x="455" y="234" text-anchor="middle" font-size="12" fill="#5b21b6">distilbert-base-uncased, 4 output labels</text>
-  <text x="455" y="252" text-anchor="middle" font-size="12" fill="#5b21b6">Hugging Face Trainer · classifier dropout 0.1</text>
-  <text x="455" y="270" text-anchor="middle" font-size="12" fill="#5b21b6">optional backbone freezing / gradual unfreezing</text>
-  <text x="455" y="288" text-anchor="middle" font-size="11.5" fill="#64748b">src/train.py --model distilbert</text>
+  <!-- Left branch: TF-IDF -->
+  <rect x="80" y="206" width="340" height="58" rx="8" fill="#F8FAFC" stroke="#64748B" stroke-width="1.5"/>
+  <text x="250" y="228" text-anchor="middle" font-size="13" font-weight="600" fill="#111827">TfidfVectorizer</text>
+  <text x="250" y="248" text-anchor="middle" font-size="11.5" fill="#4B5563">1-2 grams, min_df 3, sublinear tf, fitted on train only</text>
 
-  <!-- Evaluation -->
-  <rect x="680" y="120" width="230" height="120" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5"/>
-  <text x="795" y="146" text-anchor="middle" font-size="14" font-weight="600" fill="#15803d">Evaluation</text>
-  <text x="795" y="166" text-anchor="middle" font-size="12" fill="#166534">accuracy and macro-F1</text>
-  <text x="795" y="184" text-anchor="middle" font-size="12" fill="#166534">confusion matrices per class</text>
-  <text x="795" y="202" text-anchor="middle" font-size="12" fill="#166534">optional inference latency</text>
-  <text x="795" y="224" text-anchor="middle" font-size="11.5" fill="#64748b">src/evaluate.py · src/inference.py</text>
+  <path d="M250 264 L250 288" stroke="#9CA3AF" stroke-width="1.6" fill="none"/>
+  <rect x="80" y="288" width="340" height="58" rx="8" fill="#F8FAFC" stroke="#64748B" stroke-width="1.5"/>
+  <text x="250" y="310" text-anchor="middle" font-size="13" font-weight="600" fill="#111827">LinearSVC</text>
+  <text x="250" y="330" text-anchor="middle" font-size="11.5" fill="#4B5563">chosen on validation over logistic regression and random forest</text>
 
-  <!-- Arrows -->
-  <line x1="230" y1="113" x2="300" y2="113" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
-  <line x1="230" y1="229" x2="300" y2="243" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
-  <line x1="600" y1="115" x2="670" y2="160" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
-  <line x1="600" y1="245" x2="670" y2="200" stroke="#64748b" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <path d="M250 346 L250 370" stroke="#9CA3AF" stroke-width="1.6" fill="none"/>
+  <rect x="80" y="370" width="340" height="52" rx="8" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <text x="250" y="390" text-anchor="middle" font-size="12" fill="#111827">models/tfidf-linear-svm/</text>
+  <text x="250" y="408" text-anchor="middle" font-size="11" fill="#4B5563">model.joblib &#183; vectorizer.joblib &#183; metadata.json</text>
 
-  <!-- Chips -->
-  <rect x="110" y="322" width="340" height="34" rx="17" fill="#f1f5f9" stroke="#94a3b8"/>
-  <text x="280" y="344" text-anchor="middle" font-size="12" fill="#475569">--synthetic offline fixture: dev only, not comparable</text>
-  <rect x="470" y="322" width="360" height="34" rx="17" fill="#f1f5f9" stroke="#94a3b8"/>
-  <text x="650" y="344" text-anchor="middle" font-size="12" fill="#475569">data, checkpoints and metrics are not versioned</text>
+  <!-- Right branch: DistilBERT -->
+  <rect x="540" y="206" width="340" height="58" rx="8" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.5"/>
+  <text x="710" y="228" text-anchor="middle" font-size="13" font-weight="600" fill="#111827">DistilBERT tokenizer</text>
+  <text x="710" y="248" text-anchor="middle" font-size="11.5" fill="#4B5563">distilbert-base-uncased, max length 128, dynamic padding</text>
+
+  <path d="M710 264 L710 288" stroke="#9CA3AF" stroke-width="1.6" fill="none"/>
+  <rect x="540" y="288" width="340" height="58" rx="8" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.5"/>
+  <text x="710" y="310" text-anchor="middle" font-size="13" font-weight="600" fill="#111827">fine-tuned DistilBERT</text>
+  <text x="710" y="330" text-anchor="middle" font-size="11.5" fill="#4B5563">2 epochs, AdamW, linear decay, epoch chosen on validation</text>
+
+  <path d="M710 346 L710 370" stroke="#9CA3AF" stroke-width="1.6" fill="none"/>
+  <rect x="540" y="370" width="340" height="52" rx="8" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <text x="710" y="390" text-anchor="middle" font-size="12" fill="#111827">models/distilbert-ag-news/</text>
+  <text x="710" y="408" text-anchor="middle" font-size="11" fill="#4B5563">model.safetensors &#183; tokenizer.json &#183; config.json &#183; metadata.json</text>
+
+  <!-- Join -->
+  <path d="M250 422 L250 446 L480 446" stroke="#9CA3AF" stroke-width="1.6" fill="none"/>
+  <path d="M710 422 L710 446 L480 446" stroke="#9CA3AF" stroke-width="1.6" fill="none"/>
+  <path d="M480 446 L480 466" stroke="#9CA3AF" stroke-width="1.6" fill="none"/>
+
+  <rect x="230" y="466" width="500" height="56" rx="8" fill="#ECFDF5" stroke="#059669" stroke-width="1.6"/>
+  <text x="480" y="488" text-anchor="middle" font-size="13" font-weight="600" fill="#111827">the same 7,600 held-out documents, scored once per model</text>
+  <text x="480" y="508" text-anchor="middle" font-size="11.5" fill="#4B5563">accuracy &#183; macro F1 &#183; per-class precision and recall &#183; confusion pairs &#183; fit and inference cost</text>
+
+  <text x="480" y="544" text-anchor="middle" font-size="11" fill="#9CA3AF">Each model is loaded with the preprocessing saved beside it. Nothing is rebuilt from defaults at evaluation.</text>
 </svg>
