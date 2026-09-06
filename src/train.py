@@ -14,7 +14,7 @@ import json
 import logging
 import os
 import time
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -36,7 +36,7 @@ def train_baseline(
     y_train: np.ndarray,
     X_test: Any,
     y_test: np.ndarray,
-) -> Tuple[Any, Dict[str, Any]]:
+) -> tuple[Any, dict[str, Any]]:
     """
     Train a scikit-learn baseline model and evaluate on test set.
 
@@ -78,7 +78,7 @@ def train_baseline(
     }
 
     logger.info(
-        "Baseline — accuracy: %.4f | F1 (macro): %.4f | train: %.1fs",
+        "Baseline accuracy: %.4f | F1 (macro): %.4f | train: %.1fs",
         metrics["accuracy"],
         metrics["f1_macro"],
         train_time,
@@ -93,14 +93,14 @@ def train_baseline(
 
 def train_transformer(
     model: Any,
-    tokenized_datasets: Dict[str, Any],
+    tokenized_datasets: dict[str, Any],
     output_dir: str = "models/distilbert-ag-news",
     num_epochs: int = 3,
     batch_size: int = 32,
     learning_rate: float = 2e-5,
     weight_decay: float = 0.01,
     warmup_ratio: float = 0.1,
-) -> Tuple[Any, Dict[str, Any]]:
+) -> tuple[Any, dict[str, Any]]:
     """
     Fine-tune a transformer model using the Hugging Face Trainer API.
 
@@ -168,7 +168,7 @@ def train_transformer(
     logger.info("Model saved → %s", output_dir)
 
     logger.info(
-        "Transformer — accuracy: %.4f | F1 (macro): %.4f | train: %.1fs",
+        "Transformer accuracy: %.4f | F1 (macro): %.4f | train: %.1fs",
         metrics["eval_accuracy"],
         metrics["eval_f1_macro"],
         train_time,
@@ -183,7 +183,7 @@ def train_transformer(
 
 def save_baseline_model(
     model: Any,
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     path: str = "models/baseline",
 ) -> None:
     """Save baseline model and metrics to disk."""

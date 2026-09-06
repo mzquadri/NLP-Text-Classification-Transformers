@@ -13,11 +13,10 @@ import json
 import logging
 import os
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
 from sklearn.metrics import (
     accuracy_score,
     classification_report,
@@ -41,7 +40,7 @@ LABEL_NAMES = ["World", "Sports", "Business", "Sci/Tech"]
 # ---------------------------------------------------------------------------
 
 
-def compute_metrics_fn(eval_pred: Any) -> Dict[str, float]:
+def compute_metrics_fn(eval_pred: Any) -> dict[str, float]:
     """
     Compute metrics for the Hugging Face Trainer.
 
@@ -66,17 +65,17 @@ def compute_metrics_fn(eval_pred: Any) -> Dict[str, float]:
 class TextClassificationEvaluator:
     """Evaluate a trained model with detailed metrics and plots."""
 
-    def __init__(self, label_names: Optional[List[str]] = None) -> None:
+    def __init__(self, label_names: list[str] | None = None) -> None:
         self.label_names = label_names or LABEL_NAMES
 
     def evaluate(
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
-        y_proba: Optional[np.ndarray] = None,
-    ) -> Dict[str, Any]:
+        y_proba: np.ndarray | None = None,
+    ) -> dict[str, Any]:
         """Compute full evaluation metrics."""
-        metrics: Dict[str, Any] = {
+        metrics: dict[str, Any] = {
             "accuracy": float(accuracy_score(y_true, y_pred)),
             "f1_macro": float(f1_score(y_true, y_pred, average="macro")),
             "f1_weighted": float(f1_score(y_true, y_pred, average="weighted")),
@@ -113,7 +112,7 @@ class TextClassificationEvaluator:
         predict_fn: Any,
         sample_inputs: list,
         n_runs: int = 3,
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """Measure average inference latency per sample."""
         times = []
         for _ in range(n_runs):
@@ -135,7 +134,7 @@ class TextClassificationEvaluator:
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
-        save_path: Optional[str] = None,
+        save_path: str | None = None,
         normalize: bool = True,
     ) -> None:
         """Plot a confusion matrix heatmap."""
@@ -143,16 +142,20 @@ class TextClassificationEvaluator:
         norm = "true" if normalize else None
         cm = confusion_matrix(y_true, y_pred, normalize=norm)
 
+        # Drawn with matplotlib rather than seaborn. This was the only call that
+        # needed seaborn, and it was imported at module scope, so the whole file
+        # could not be imported without an extra dependency installed.
         fig, ax = plt.subplots(figsize=(8, 6))
-        sns.heatmap(
-            cm,
-            annot=True,
-            fmt=fmt,
-            cmap="Blues",
-            xticklabels=self.label_names,
-            yticklabels=self.label_names,
-            ax=ax,
-        )
+        image = ax.imshow(cm, cmap="Blues", vmin=0, vmax=cm.max())
+        fig.colorbar(image, ax=ax, shrink=0.82)
+        ax.set_xticks(range(len(self.label_names)), self.label_names)
+        ax.set_yticks(range(len(self.label_names)), self.label_names)
+        midpoint = cm.max() / 2.0
+        for row in range(cm.shape[0]):
+            for column in range(cm.shape[1]):
+                ax.text(column, row, format(cm[row, column], fmt),
+                        ha="center", va="center",
+                        color="white" if cm[row, column] > midpoint else "black")
         ax.set_xlabel("Predicted")
         ax.set_ylabel("True")
         ax.set_title("Confusion Matrix")
@@ -166,8 +169,8 @@ class TextClassificationEvaluator:
 
     def plot_per_class_metrics(
         self,
-        metrics: Dict[str, Any],
-        save_path: Optional[str] = None,
+        metrics: dict[str, Any],
+        save_path: str | None = None,
     ) -> None:
         """Bar chart of per-class F1, precision, recall."""
         report = metrics["classification_report"]
@@ -199,8 +202,8 @@ class TextClassificationEvaluator:
 
     def plot_model_comparison(
         self,
-        results: Dict[str, Dict[str, float]],
-        save_path: Optional[str] = None,
+        results: dict[str, dict[str, float]],
+        save_path: str | None = None,
     ) -> None:
         """Bar chart comparing accuracy and F1 across models."""
         models = list(results.keys())
@@ -234,7 +237,7 @@ class TextClassificationEvaluator:
 
 
 def generate_evaluation_report(
-    metrics: Dict[str, Any],
+    metrics: dict[str, Any],
     output_dir: str = "results",
 ) -> str:
     """Save evaluation metrics as JSON."""
@@ -264,7 +267,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    from src.data_loader import create_tfidf_features, load_ag_news
+    from src.data_loader import load_ag_news
 
     train_df, test_df = load_ag_news(allow_synthetic=args.synthetic)
     evaluator = TextClassificationEvaluator()
@@ -273,18 +276,36 @@ def main() -> None:
         import joblib
 
         model = joblib.load(os.path.join(args.model_path, "model.joblib"))
-        tfidf_data = create_tfidf_features(train_df, test_df)
-        y_pred = model.predict(tfidf_data["X_test"])
-        y_true = tfidf_data["y_test"]
-    else:
-        from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
-        tokenizer = AutoTokenizer.from_pretrained(args.model_path)
+        # Load the vectoriser that was saved beside the model rather than fitting
+        # a new one. A fresh fit on a different training frame produces a
+        # different vocabulary, so the saved model is handed a feature matrix of
+        # the wrong width and either raises or, if the widths happen to agree,
+        # scores against columns that mean something else. src/inference.py
+        # already loaded the saved vectoriser; this path did not.
+        vectorizer_path = os.path.join(args.model_path, "vectorizer.joblib")
+        if not os.path.isfile(vectorizer_path):
+            raise SystemExit(
+                f"No vectorizer at {vectorizer_path}. It is written by "
+                f"src/train.py beside the model, and evaluating without it would "
+                f"score the model against a different feature space."
+            )
+        vectorizer = joblib.load(vectorizer_path)
+        y_pred = model.predict(vectorizer.transform(test_df["text"]))
+        y_true = test_df["label"].values
+    else:
+        from transformers import AutoModelForSequenceClassification
+
         model = AutoModelForSequenceClassification.from_pretrained(args.model_path)
 
         from src.data_loader import create_tokenized_datasets
 
-        tok_data = create_tokenized_datasets(train_df, test_df)
+        # Tokenise with the tokeniser saved beside the model, not with a fresh one
+        # from the base checkpoint. The two usually agree for DistilBERT, so the
+        # discrepancy would not show up as an error, only as a wrong number if the
+        # saved tokeniser had ever been changed.
+        tok_data = create_tokenized_datasets(
+            train_df, test_df, model_name=args.model_path)
 
         from transformers import Trainer
 

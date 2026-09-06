@@ -15,7 +15,7 @@ Usage:
 """
 
 import logging
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -41,7 +41,7 @@ NUM_LABELS = len(LABEL_NAMES)
 def load_ag_news(
     cache_dir: str = "data",
     allow_synthetic: bool = False,
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Load the AG News dataset via Hugging Face ``datasets``.
 
@@ -73,7 +73,7 @@ def load_ag_news(
 
 def _generate_synthetic_ag_news(
     n_train: int = 4000, n_test: int = 800
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Generate synthetic news-like data for offline development."""
     rng = np.random.default_rng(42)
 
@@ -148,7 +148,7 @@ def create_tokenized_datasets(
     model_name: str = "distilbert-base-uncased",
     max_length: int = 128,
     val_size: float = 0.1,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Tokenize text data using a Hugging Face AutoTokenizer.
 
@@ -168,7 +168,7 @@ def create_tokenized_datasets(
         train_df, test_size=val_size, random_state=42, stratify=train_df["label"]
     )
 
-    def _tokenize(batch: Dict[str, list]) -> Dict[str, Any]:
+    def _tokenize(batch: dict[str, list]) -> dict[str, Any]:
         return tokenizer(
             batch["text"],
             padding="max_length",
@@ -214,8 +214,8 @@ def create_tfidf_features(
     train_df: pd.DataFrame,
     test_df: pd.DataFrame,
     max_features: int = 50_000,
-    ngram_range: Tuple[int, int] = (1, 2),
-) -> Dict[str, Any]:
+    ngram_range: tuple[int, int] = (1, 2),
+) -> dict[str, Any]:
     """
     Build TF-IDF feature matrices for baseline models.
 
@@ -234,7 +234,7 @@ def create_tfidf_features(
     X_test = vectorizer.transform(test_df["text"])
 
     logger.info(
-        "TF-IDF features: %d train × %d features",
+        "TF-IDF features: %d train rows, %d features",
         X_train.shape[0],
         X_train.shape[1],
     )

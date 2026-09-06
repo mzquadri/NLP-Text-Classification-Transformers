@@ -10,7 +10,7 @@ Usage:
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 logging.basicConfig(
     level=logging.INFO,
@@ -42,7 +42,7 @@ def build_baseline_model(
     from sklearn.linear_model import LogisticRegression
     from sklearn.svm import LinearSVC
 
-    defaults: Dict[str, Dict[str, Any]] = {
+    defaults: dict[str, dict[str, Any]] = {
         "logistic_regression": {
             "C": 1.0,
             "max_iter": 1000,
@@ -151,7 +151,7 @@ def freeze_backbone(model: Any, unfreeze_last_n: int = 0) -> None:
     )
 
 
-def get_model_summary(model: Any) -> Dict[str, Any]:
+def get_model_summary(model: Any) -> dict[str, Any]:
     """Return a summary dict of model architecture and parameter counts."""
     total = sum(p.numel() for p in model.parameters())
     trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)

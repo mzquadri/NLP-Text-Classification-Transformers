@@ -10,7 +10,7 @@ Usage:
 import logging
 import os
 import random
-from typing import Any, Dict, Optional
+from typing import Any
 
 import numpy as np
 import yaml
@@ -80,7 +80,7 @@ def get_device(prefer_gpu: bool = True) -> str:
 # Configuration
 # ---------------------------------------------------------------------------
 
-DEFAULT_CONFIG: Dict[str, Any] = {
+DEFAULT_CONFIG: dict[str, Any] = {
     "data": {
         "dataset": "ag_news",
         "max_length": 128,
@@ -108,7 +108,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
 }
 
 
-def load_config(path: Optional[str] = None) -> Dict[str, Any]:
+def load_config(path: str | None = None) -> dict[str, Any]:
     """
     Load configuration from a YAML file, falling back to defaults.
 
@@ -142,7 +142,7 @@ def _deep_update(base: dict, override: dict) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def setup_logging(log_file: Optional[str] = None, level: int = logging.INFO) -> None:
+def setup_logging(log_file: str | None = None, level: int = logging.INFO) -> None:
     """Configure logging with optional file output."""
     handlers = [logging.StreamHandler()]
     if log_file:
@@ -162,7 +162,7 @@ def setup_logging(log_file: Optional[str] = None, level: int = logging.INFO) -> 
 # ---------------------------------------------------------------------------
 
 
-def count_parameters(model: Any) -> Dict[str, int]:
+def count_parameters(model: Any) -> dict[str, int]:
     """Count total and trainable parameters in a PyTorch model."""
     total = sum(p.numel() for p in model.parameters())
     trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)

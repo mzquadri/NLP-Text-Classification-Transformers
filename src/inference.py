@@ -13,7 +13,7 @@ import argparse
 import logging
 import os
 import time
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import numpy as np
 
@@ -45,7 +45,7 @@ class BaselinePredictor:
         self.vectorizer = joblib.load(vectorizer_path)
         logger.info("Baseline model loaded from %s", model_path)
 
-    def predict(self, text: str) -> Dict[str, Any]:
+    def predict(self, text: str) -> dict[str, Any]:
         """Predict class for a single text."""
         t0 = time.perf_counter()
         X = self.vectorizer.transform([text])
@@ -71,7 +71,7 @@ class BaselinePredictor:
             "latency_ms": round(latency, 3),
         }
 
-    def predict_batch(self, texts: List[str]) -> List[Dict[str, Any]]:
+    def predict_batch(self, texts: list[str]) -> list[dict[str, Any]]:
         """Predict classes for multiple texts."""
         return [self.predict(t) for t in texts]
 
@@ -87,7 +87,7 @@ class TransformerPredictor:
     def __init__(
         self,
         model_path: str = "models/distilbert-ag-news",
-        device: Optional[str] = None,
+        device: str | None = None,
     ) -> None:
         import torch
         from transformers import AutoModelForSequenceClassification, AutoTokenizer
@@ -103,7 +103,7 @@ class TransformerPredictor:
         self.model.eval()
         logger.info("Transformer model loaded on %s from %s", self.device, model_path)
 
-    def predict(self, text: str) -> Dict[str, Any]:
+    def predict(self, text: str) -> dict[str, Any]:
         """Predict class for a single text with confidence scores."""
         import torch
 
@@ -136,7 +136,7 @@ class TransformerPredictor:
             "latency_ms": round(latency, 3),
         }
 
-    def predict_batch(self, texts: List[str]) -> List[Dict[str, Any]]:
+    def predict_batch(self, texts: list[str]) -> list[dict[str, Any]]:
         """Predict classes for multiple texts (sequential for simplicity)."""
         return [self.predict(t) for t in texts]
 
@@ -148,8 +148,8 @@ class TransformerPredictor:
 
 def get_predictor(
     model_type: str = "transformer",
-    model_path: Optional[str] = None,
-) -> Union[BaselinePredictor, TransformerPredictor]:
+    model_path: str | None = None,
+) -> BaselinePredictor | TransformerPredictor:
     """
     Factory to get the appropriate predictor.
 
