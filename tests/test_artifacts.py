@@ -13,6 +13,7 @@ These tests fail if either substitution is reintroduced.
 from __future__ import annotations
 
 import json
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -180,3 +181,38 @@ class RecordedArtifactsMatchTheResults(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DatasetIdentifierIsCanonical(unittest.TestCase):
+    """A bare Hub alias resolves from a warm cache but not from a clean machine.
+
+    `load_dataset("ag_news")` worked on the machine the results were produced on,
+    because the dataset was already downloaded, and failed in continuous
+    integration with HfUriError: current huggingface_hub requires namespace/name.
+    The failure is invisible to anyone whose cache is already populated, so it is
+    pinned here rather than left to the next clean checkout.
+    """
+
+    def test_every_load_call_names_a_namespace(self):
+        source_directory = Path(__file__).resolve().parents[1] / "src"
+        calls = []
+        for path in sorted(source_directory.glob("*.py")):
+            for line in path.read_text(encoding="utf-8").splitlines():
+                if "load_dataset(" in line and "def " not in line:
+                    calls.append((path.name, line.strip()))
+        self.assertTrue(calls, "no load_dataset call found to check")
+        for name, line in calls:
+            with self.subTest(file=name, line=line):
+                # Either a literal with a namespace, or the DATASET constant.
+                literal = re.search(r'load_dataset\(\s*"([^"]+)"', line)
+                if literal:
+                    self.assertIn("/", literal.group(1),
+                                  "a bare dataset alias will not resolve on a "
+                                  "machine without a warm cache")
+                else:
+                    self.assertIn("DATASET", line)
+
+    def test_the_benchmark_constant_carries_a_namespace(self):
+        from src.benchmark import DATASET
+        self.assertIn("/", DATASET)
+        self.assertTrue(DATASET.endswith("ag_news"))

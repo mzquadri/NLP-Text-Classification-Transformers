@@ -55,7 +55,9 @@ def load_ag_news(
     try:
         from datasets import load_dataset
 
-        ds = load_dataset("ag_news", cache_dir=cache_dir)
+        # Canonical namespace/name. See the note in src/benchmark.py: the
+        # bare alias only resolves against an already populated cache.
+        ds = load_dataset("fancyzhx/ag_news", cache_dir=cache_dir)
         train_df = ds["train"].to_pandas()  # type: ignore[union-attr]
         test_df = ds["test"].to_pandas()  # type: ignore[union-attr]
         logger.info("AG News loaded: %d train, %d test", len(train_df), len(test_df))

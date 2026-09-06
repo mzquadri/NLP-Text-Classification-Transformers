@@ -1,10 +1,10 @@
 {
   "environment": {
-    "generated_utc": "2026-09-06T16:19:10Z",
+    "generated_utc": "2026-09-06T18:28:51Z",
     "python": "3.13.9"
   },
   "data": {
-    "dataset": "ag_news",
+    "dataset": "fancyzhx/ag_news",
     "source": "Hugging Face Datasets, the published splits",
     "classes": [
       "World",
@@ -186,10 +186,15 @@
             "share_of_errors": 0.0957
           }
         ],
-        "train_seconds": 26.52,
-        "vectorise_seconds": 14.96,
-        "total_fit_seconds": 41.47,
-        "milliseconds_per_document": 0.0009
+        "train_seconds": 26.92,
+        "vectorise_seconds": 15.06,
+        "total_fit_seconds": 41.98,
+        "milliseconds_per_document": 0.00108,
+        "documents_per_second": 924068,
+        "documents_per_second_slowest": 653353,
+        "documents_per_second_fastest": 1170041,
+        "prediction_timing_repeats": 7,
+        "timing_note": "model forward only, on an already vectorised matrix. Predicting 7,600 rows from a sparse matrix takes a few milliseconds in total, close enough to the timer floor that repeated measurement spans a threefold range. The spread is recorded rather than hidden behind a median"
       },
       "linear_svm": {
         "validation": {
@@ -348,10 +353,15 @@
             "share_of_errors": 0.0991
           }
         ],
-        "train_seconds": 4.63,
-        "vectorise_seconds": 14.96,
-        "total_fit_seconds": 19.58,
-        "milliseconds_per_document": 0.0007
+        "train_seconds": 4.4,
+        "vectorise_seconds": 15.06,
+        "total_fit_seconds": 19.46,
+        "milliseconds_per_document": 0.00027,
+        "documents_per_second": 3770589,
+        "documents_per_second_slowest": 2477103,
+        "documents_per_second_fastest": 4228800,
+        "prediction_timing_repeats": 7,
+        "timing_note": "model forward only, on an already vectorised matrix. Predicting 7,600 rows from a sparse matrix takes a few milliseconds in total, close enough to the timer floor that repeated measurement spans a threefold range. The spread is recorded rather than hidden behind a median"
       },
       "random_forest": {
         "validation": {
@@ -510,10 +520,15 @@
             "share_of_errors": 0.0913
           }
         ],
-        "train_seconds": 53.16,
-        "vectorise_seconds": 14.96,
-        "total_fit_seconds": 68.12,
-        "milliseconds_per_document": 0.0183
+        "train_seconds": 52.0,
+        "vectorise_seconds": 15.06,
+        "total_fit_seconds": 67.06,
+        "milliseconds_per_document": 0.02153,
+        "documents_per_second": 46438,
+        "documents_per_second_slowest": 40260,
+        "documents_per_second_fastest": 52706,
+        "prediction_timing_repeats": 7,
+        "timing_note": "model forward only, on an already vectorised matrix. Predicting 7,600 rows from a sparse matrix takes a few milliseconds in total, close enough to the timer floor that repeated measurement spans a threefold range. The spread is recorded rather than hidden behind a median"
       }
     },
     "chosen_on_validation": "linear_svm",
@@ -522,22 +537,22 @@
     "artifact": {
       "kind": "baseline",
       "directory": "models/tfidf-linear-svm",
-      "total_bytes": 14550490,
+      "total_bytes": 14550499,
       "files": [
         {
           "name": "metadata.json",
-          "bytes": 631,
-          "sha256_prefix": "5d9a6dff972e38ff"
+          "bytes": 640,
+          "sha256_prefix": "da201b61c3be3520"
         },
         {
           "name": "model.joblib",
           "bytes": 6400771,
-          "sha256_prefix": "82f5ce08c0bbd6c8"
+          "sha256_prefix": "933d8d63677b7aa7"
         },
         {
           "name": "vectorizer.joblib",
           "bytes": 8149088,
-          "sha256_prefix": "336d523e38daa702"
+          "sha256_prefix": "401c008fa1df57d3"
         }
       ]
     },
@@ -46549,15 +46564,24 @@
     "baseline_test_macro_f1": 0.9267865111800165,
     "transformer_test_macro_f1": 0.9467504802727555,
     "macro_f1_gain_points": 1.996,
-    "baseline_artifact_bytes": 14550490,
+    "baseline_artifact_bytes": 14550499,
     "transformer_artifact_bytes": 268784958,
     "model_size_multiple": 18.5,
     "baseline_test_accuracy": 0.9269736842105263,
     "transformer_test_accuracy": 0.9467105263157894,
     "accuracy_gain_points": 1.974,
     "errors_removed_fraction": 0.2703,
-    "training_time_multiple": 219.6,
-    "inference_time_multiple": 7612.3
+    "training_time_multiple": 220.9,
+    "baseline_documents_per_second": 3770589,
+    "baseline_documents_per_second_range": [
+      2477103,
+      4228800
+    ],
+    "transformer_documents_per_second": 187.7,
+    "inference_ratio_range": [
+      13197,
+      22530
+    ]
   },
   "error_analysis": {
     "linear_svm": {

@@ -87,8 +87,8 @@ def findings(data: dict) -> dict:
             comparison["accuracy_gain_points"] < 5.0,
         "the transformer costs more to fit":
             comparison["training_time_multiple"] > 1.0,
-        "the transformer costs more per document at inference":
-            comparison["inference_time_multiple"] > 1.0,
+        "the classical model answers far more documents per second":
+            min(comparison["inference_ratio_range"]) > 100,
         "the transformer artifact is larger on disk":
             comparison["model_size_multiple"] > 1.0,
         "no exact train and test overlap was found":

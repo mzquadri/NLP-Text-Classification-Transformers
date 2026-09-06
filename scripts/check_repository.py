@@ -104,8 +104,10 @@ def claims(data: dict) -> list[tuple[str, str]]:
          "the share of errors removed"),
         (f"{comparison['training_time_multiple']:,.0f} times the fit time",
          "the fit time multiple"),
-        (f"{comparison['inference_time_multiple']:,.0f} times the time per document",
-         "the inference multiple"),
+        (f"{comparison['inference_ratio_range'][0]:,} to "
+         f"{comparison['inference_ratio_range'][1]:,} times", "the inference range"),
+        (f"{comparison['transformer_documents_per_second']:,.1f} documents per second",
+         "the transformer throughput"),
         (f"{comparison['model_size_multiple']:,.0f} times the artifact size",
          "the artifact size multiple"),
     ]

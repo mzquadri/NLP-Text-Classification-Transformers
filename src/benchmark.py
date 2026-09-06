@@ -37,6 +37,14 @@ SEED = 42
 VAL_FRACTION = 0.1
 LABEL_NAMES = ("World", "Sports", "Business", "Sci/Tech")
 
+#: The canonical Hub id, with its namespace. The bare "ag_news" alias resolves
+#: from a warm local cache but not from a clean machine: current huggingface_hub
+#: requires namespace/name and raises HfUriError otherwise. That failure is
+#: invisible to anyone who has already downloaded the dataset, which is why it
+#: reached continuous integration before it was noticed. The two ids return
+#: byte-identical text and labels for both splits.
+DATASET = "fancyzhx/ag_news"
+
 #: DistilBERT settings. Sequence length covers the AG News text at the 99th
 #: percentile; padding is dynamic so short items do not pay for the tail.
 MODEL_NAME = "distilbert-base-uncased"
@@ -45,13 +53,16 @@ BATCH_SIZE = 64
 EPOCHS = 2
 LEARNING_RATE = 5e-5
 
+#: Repeats used to time classical prediction, reduced to the median.
+PREDICT_REPEATS = 7
+
 
 def load_splits():
     """AG News, with a validation split carved out of the training data."""
     from datasets import load_dataset
     from sklearn.model_selection import train_test_split
 
-    data = load_dataset("ag_news")
+    data = load_dataset(DATASET)
     texts = np.array(data["train"]["text"])
     labels = np.array(data["train"]["label"])
     train_text, val_text, train_label, val_label = train_test_split(
@@ -195,9 +206,19 @@ def run_baselines(splits) -> dict:
         train_seconds = time.perf_counter() - started
         models[name] = model
 
-        started = time.perf_counter()
+        # Timed several times and reduced to the median. A single measurement of
+        # the SVM is unreliable: predicting 7,600 documents from a precomputed
+        # sparse matrix takes a few milliseconds in total, so ordinary scheduling
+        # noise moved the reported cost multiple by nearly half between two runs
+        # that produced identical predictions.
         predicted_test = model.predict(x_test)
-        predict_seconds = time.perf_counter() - started
+        timings = []
+        for _ in range(PREDICT_REPEATS):
+            started = time.perf_counter()
+            model.predict(x_test)
+            timings.append(time.perf_counter() - started)
+        predict_seconds = float(np.median(timings))
+        throughput = [len(test_label) / value for value in timings]
 
         results[name] = {
             "validation": scores(val_label, model.predict(x_val)),
@@ -208,7 +229,16 @@ def run_baselines(splits) -> dict:
             "vectorise_seconds": round(vectorise_seconds, 2),
             "total_fit_seconds": round(train_seconds + vectorise_seconds, 2),
             "milliseconds_per_document": round(
-                predict_seconds / len(test_label) * 1000, 4),
+                predict_seconds / len(test_label) * 1000, 5),
+            "documents_per_second": round(float(np.median(throughput))),
+            "documents_per_second_slowest": round(min(throughput)),
+            "documents_per_second_fastest": round(max(throughput)),
+            "prediction_timing_repeats": PREDICT_REPEATS,
+            "timing_note": "model forward only, on an already vectorised matrix. "
+                           "Predicting 7,600 rows from a sparse matrix takes a few "
+                           "milliseconds in total, close enough to the timer floor "
+                           "that repeated measurement spans a threefold range. The "
+                           "spread is recorded rather than hidden behind a median",
             "_predicted_test": predicted_test.tolist(),
         }
         print(f"  {name:<20} val {results[name]['validation']['accuracy'] * 100:5.2f}"
@@ -240,7 +270,7 @@ def run_baselines(splits) -> dict:
             "strip_accents": "unicode", "min_df": 3,
         },
         "features": int(x_train.shape[1]),
-        "trained_on": {"dataset": "ag_news", "split": "train",
+        "trained_on": {"dataset": DATASET, "split": "train",
                        "rows": len(train_label), "seed": SEED},
         "labels": list(LABEL_NAMES),
         "note": "model.joblib and vectorizer.joblib belong together; the "
@@ -397,7 +427,7 @@ def run_transformer(splits) -> dict:
     write_metadata(TRANSFORMER_DIR, {
         "kind": "transformer",
         "configuration": configuration,
-        "trained_on": {"dataset": "ag_news", "split": "train",
+        "trained_on": {"dataset": DATASET, "split": "train",
                        "rows": len(splits["train"][1])},
         "epoch_chosen_on_validation": best["epoch"],
         "labels": list(LABEL_NAMES),
@@ -456,7 +486,7 @@ def main() -> int:
         "python": platform.python_version(),
     }
     payload["data"] = {
-        "dataset": "ag_news",
+        "dataset": DATASET,
         "source": "Hugging Face Datasets, the published splits",
         "classes": list(LABEL_NAMES),
         "train": len(splits["train"][1]),
@@ -512,17 +542,31 @@ def main() -> int:
                 / (1 - baseline["test"]["accuracy"]), 4),
             "training_time_multiple": round(
                 transformer["train_seconds"] / baseline["total_fit_seconds"], 1),
-            "inference_time_multiple": round(
-                transformer["milliseconds_per_document"]
-                / baseline["milliseconds_per_document"], 1),
+            # Reported as a range. The classical side is close enough to the
+            # timer floor that a single figure, a median, or even the order of
+            # magnitude moved between identical runs. What is stable is that it
+            # is thousands of times faster, so that is what is recorded.
+            "baseline_documents_per_second": baseline["documents_per_second"],
+            "baseline_documents_per_second_range": [
+                baseline["documents_per_second_slowest"],
+                baseline["documents_per_second_fastest"]],
+            "transformer_documents_per_second": transformer["documents_per_second"],
+            "inference_ratio_range": [
+                round(baseline["documents_per_second_slowest"]
+                      / transformer["documents_per_second"]),
+                round(baseline["documents_per_second_fastest"]
+                      / transformer["documents_per_second"])],
         }
         summary = payload["comparison"]
         print(f"\n  {best_baseline} {baseline['test']['accuracy'] * 100:.2f} against "
               f"DistilBERT {transformer['test']['accuracy'] * 100:.2f}")
         print(f"  {summary['accuracy_gain_points']:+.2f} points, removing "
               f"{summary['errors_removed_fraction'] * 100:.1f} percent of the errors")
-        print(f"  for {summary['training_time_multiple']}x the training time and "
-              f"{summary['inference_time_multiple']}x the time per document")
+        low, high = summary["inference_ratio_range"]
+        print(f"  for {summary['training_time_multiple']}x the training time, and "
+              f"{low:,} to {high:,} times the throughput")
+        print(f"  {summary['baseline_documents_per_second']:,} documents per second "
+              f"against {summary['transformer_documents_per_second']:,}")
 
     arguments.out.parent.mkdir(parents=True, exist_ok=True)
     arguments.out.write_text(json.dumps(payload, indent=2) + "\n",

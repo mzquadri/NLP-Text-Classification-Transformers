@@ -12,7 +12,7 @@ public and downloads in seconds, so the comparison is now run and recorded.
 
 The result is a real improvement that is smaller than its price tag. A linear SVM
 over TF-IDF features reaches 92.70 percent on the published test split after a
-19.58 second fit. DistilBERT, fine-tuned once at a configuration fixed in advance,
+19.46 second fit. DistilBERT, fine-tuned once at a configuration fixed in advance,
 reaches 94.67 percent after 4,298.8 seconds on a GPU.
 
 ![All five, scored on the same held-out documents](docs/figures/01_model_comparison.png)
@@ -137,19 +137,29 @@ Both scored on the same 7,600 held-out documents.
 | Test accuracy | 92.70 | 94.67 | +1.97 points |
 | Macro F1 | 92.68 | 94.68 | +2.00 points |
 | Errors | 555 | 405 | 150 fewer |
-| Fit time | 19.58 s | 4,298.8 s | 220 times |
+| Fit time | 19.46 s | 4,298.8 s | 221 times |
 | Artifact on disk | 14.6 MB | 268.8 MB | 18 times |
-| Time per document | 0.0007 ms | 5.329 ms | 7,612 times |
+| Throughput | 3,770,589 docs/s | 187.7 docs/s | see below |
 
 DistilBERT wins, by +1.97 points of accuracy and +2.00 of macro F1, removing
-27.0 percent of its errors. It pays 220 times the fit time, 18 times the artifact
-size and 7,612 times the time per document for that.
+27.0 percent of its errors. It pays 221 times the fit time and 18 times the artifact
+size for that, and it is thousands of times slower per document.
+
+The throughput gap is given as a range rather than a figure. DistilBERT processes
+187.7 documents per second, which is measured reliably. The SVM's forward pass
+over an already vectorised matrix takes a few milliseconds for all 7,600 rows,
+close enough to the timer floor that seven repeated measurements span 2,477,103 to
+4,228,800 documents per second. The ratio is somewhere between 13,197 to 22,530
+times. Pinning that to one number, or even to an order of magnitude, is more
+precision than the measurement supports, and an earlier version of this file
+quoted a single multiple that moved by a factor of five between identical runs.
 
 Read plainly: on AG News a linear SVM already captures most of the available
 classification performance at a small fraction of the cost, and the transformer
-buys roughly two points on top of it. Whether two points justify those multiples
-is a deployment decision and not an accuracy one. At 187.7 documents per second
-against roughly 1.4 million for the SVM, the two belong in different systems.
+buys roughly two points on top of it. Whether two points justify a model that
+takes 221 times as long to fit, occupies 18 times the disk and answers four orders
+of magnitude fewer documents per second is a deployment decision, not an accuracy
+one.
 
 ## Per-class results
 

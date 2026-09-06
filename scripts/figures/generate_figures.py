@@ -130,8 +130,8 @@ def figure_02_cost_against_quality(data: dict) -> None:
         ("Artifact on disk", "megabytes",
          data["baselines"]["artifact"]["total_bytes"] / 1e6,
          transformer["artifact"]["total_bytes"] / 1e6, "{:,.0f}", True),
-        ("Time per document", "milliseconds", baseline["milliseconds_per_document"],
-         transformer["milliseconds_per_document"], "{:.3f}", True),
+        ("Throughput", "documents per second", baseline["documents_per_second"],
+         transformer["documents_per_second"], "{:,.0f}", True),
     ]
 
     fig, axes = plt.subplots(1, 4, figsize=(13.2, 6.0))
@@ -154,7 +154,10 @@ def figure_02_cost_against_quality(data: dict) -> None:
         axis.set_xticks([0, 1])
         axis.set_xticklabels(["linear\nSVM", "Distil\nBERT"], fontsize=10,
                              color=ps.INK)
-        axis.set_title(title, fontsize=12, color=ps.INK, pad=10, loc="left")
+        axis.set_title(title + ("  (higher is better)" if title == "Throughput"
+                                else ""),
+                       fontsize=12 if title != "Throughput" else 10.5,
+                       color=ps.INK, pad=10, loc="left")
         axis.set_ylabel(unit, fontsize=10, color=ps.MUTED)
         ps.clean(axis, grid_axis="y")
 
@@ -164,15 +167,17 @@ def figure_02_cost_against_quality(data: dict) -> None:
         "held-out documents. Three of the four\npanels use a log scale, because "
         "the cost differences are much larger than the accuracy difference.")
 
+    low, high = comparison["inference_ratio_range"]
     ps.footnote(fig, [
         f"{comparison['accuracy_gain_points']:+.2f} points of accuracy and "
         f"{comparison['macro_f1_gain_points']:+.2f} of macro F1, for "
-        f"{comparison['training_time_multiple']:,.0f} times the fit time, "
-        f"{comparison['model_size_multiple']:,.0f} times the artifact size and "
-        f"{comparison['inference_time_multiple']:,.0f} times the",
-        "time per document. The fit time is hardware-specific: the SVM was fitted "
-        "on a CPU and the transformer on a GPU.",
-    ])
+        f"{comparison['training_time_multiple']:,.0f} times the fit time and "
+        f"{comparison['model_size_multiple']:,.0f} times the artifact size.",
+        f"The throughput bar for the SVM is a median: it sits near the timer floor "
+        f"and repeated measurement puts the ratio between {low:,} and {high:,}. "
+        f"The fit times are hardware-specific,",
+        "measured with the SVM on a CPU and the transformer on a GPU.",
+    ], y=0.105)
     ps.save(fig, FIGURES, "02_cost_against_quality")
 
 

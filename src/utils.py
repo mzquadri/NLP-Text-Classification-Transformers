@@ -82,7 +82,7 @@ def get_device(prefer_gpu: bool = True) -> str:
 
 DEFAULT_CONFIG: dict[str, Any] = {
     "data": {
-        "dataset": "ag_news",
+        "dataset": "fancyzhx/ag_news",
         "max_length": 128,
         "val_size": 0.1,
         "max_tfidf_features": 50000,
