@@ -1,0 +1,15 @@
+# Additionally needed to fine-tune DistilBERT, which is the slow track of
+# src/benchmark.py. Continuous integration does not install these and does not
+# rerun that track; it checks the recorded transformer results instead.
+#
+# The torch pin here is the CPU build. The recorded run used 2.11.0+xpu on an
+# Intel Arc Pro 140T, which is why the training seconds in the results file are
+# what they are; on another device the accuracy should hold and the timings will
+# not.
+
+-r requirements.txt
+
+torch==2.11.0
+transformers==4.57.6
+tokenizers==0.22.2
+accelerate==1.12.0

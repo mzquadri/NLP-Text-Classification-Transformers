@@ -4,7 +4,9 @@ data/
 *.tsv
 *.parquet
 
-# Models
+# Models. Trained artifacts are not committed; they are large and rebuildable.
+# results/benchmark.json records each one's file names, sizes and content hashes
+# so a reported number can still be traced to the artifact that produced it.
 models/
 *.bin
 *.pt
@@ -12,9 +14,11 @@ models/
 *.safetensors
 *.joblib
 
-# Results (keep directory)
+# Results (keep directory). benchmark.json is the evidence the README is bound
+# to and scripts/check_repository.py verifies against, so it is tracked.
 results/*.png
 results/*.json
+!results/benchmark.json
 
 # Hugging Face cache
 .cache/
