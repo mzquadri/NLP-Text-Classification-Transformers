@@ -1,5 +1,15 @@
 # AG News: a strong classical baseline against one transformer fine-tune
 
+<!-- project-story:start -->
+<p align="center"><img src="docs/assets/architecture-animated.svg" alt="Animated architecture diagram of this project" width="100%"></p>
+
+| Problem | Why it mattered | Result |
+|---|---|---|
+| A failed download can quietly become a fake score. | Template text gives a number nobody should trust. | **It stops** without the real dataset the run fails rather than falling back |
+
+[See it animated on mzquadri.de](https://mzquadri.de/work/nlp-transformers)
+<!-- project-story:end -->
+
 AG News is a four-way topic classification task. Each item is a news headline and
 the opening of its story, and the label is the desk it came from: World, Sports,
 Business or Sci/Tech. It is a well-worn benchmark, which is what makes it useful
